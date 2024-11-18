@@ -1,101 +1,161 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import Header from "./components/Header"
+import Footer from "./components/Footer"
+import SkillCard from "./components/SkillCard"
+import ProjectCard from "./components/ProjectCard"
+import SocialLink from "./components/SocialLink"
+import { Button } from "./components/Button"
+import { Github, Linkedin, Mail } from "lucide-react"
+import Link from "next/link"
+import { content } from "./lib/content"
+import { skills } from "./lib/skills"
+import { projects } from "./lib/projects"
+import { Language } from "./types"
+
+export default function Portfolio() {
+  const [activeTab, setActiveTab] = useState("skills")
+  const [language, setLanguage] = useState<Language>('en')
+
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
+    transition: { duration: 0.5 }
+  }
+
+  const heroTextVariants = {
+    initial: { opacity: 0, y: 50 },
+    animate: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+      },
+    }),
+  }
+
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'fr' : 'en')
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+      <Header 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        language={language} 
+        toggleLanguage={toggleLanguage}
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <main className="container mx-auto px-6 py-12">
+        <motion.section 
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="mb-8">
+            {[content[language].welcome, content[language].portfolio].map((text, index) => (
+              <motion.h2
+                key={index}
+                custom={index}
+                variants={heroTextVariants}
+                initial="initial"
+                animate="animate"
+                className="text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600"
+              >
+                {text}
+              </motion.h2>
+            ))}
+          </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="text-xl text-gray-300 mb-8"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {content[language].intro}
+          </motion.p>
+          <motion.div
+            className="flex justify-center space-x-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
           >
-            Read our docs
-          </a>
-        </div>
+            <SocialLink href="https://www.linkedin.com/in/luca-delarue-474a67220/" icon={<Linkedin />} label="LinkedIn" />
+            <SocialLink href="https://github.com/Luffy-lulu" icon={<Github />} label="GitHub" />
+          </motion.div>
+        </motion.section>
+
+        <AnimatePresence mode="wait">
+          {activeTab === "skills" && (
+            <motion.section
+              key="skills"
+              {...fadeIn}
+            >
+              <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                {content[language].skills}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Object.entries(skills[language]).map(([title, skillList]) => (
+                  <SkillCard key={title} title={title} skills={skillList} />
+                ))}
+              </div>
+            </motion.section>
+          )}
+
+          {activeTab === "projects" && (
+            <motion.section
+              key="projects"
+              {...fadeIn}
+            >
+              <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                {content[language].projects}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects[language].map((project, index) => (
+                  <ProjectCard 
+                    key={index}
+                    title={project.title}
+                    description={project.description}
+                    link={project.link}
+                    viewOnGithub={content[language].viewOnGithub}
+                  />
+                ))}
+              </div>
+            </motion.section>
+          )}
+
+          {activeTab === "contact" && (
+            <motion.section
+              key="contact"
+              {...fadeIn}
+            >
+              <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                {content[language].getInTouch}
+              </h2>
+              <p className="text-xl text-gray-300 mb-8">
+                {content[language].openToOpportunities}
+              </p>
+              <div className="flex justify-center space-x-4">
+                <Button asChild variant="outline" className="bg-gray-700 hover:bg-gray-600 transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <Link href="mailto:lucadelarue19@gmail.com">
+                    <Mail className="mr-2 h-4 w-4" /> Email
+                  </Link>
+                </Button>
+                <SocialLink href="https://www.linkedin.com/in/luca-delarue-474a67220/" icon={<Linkedin />} label="LinkedIn" />
+                <SocialLink href="https://github.com/Luffy-lulu" icon={<Github />} label="GitHub" />
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <Footer language={language} />
     </div>
-  );
+  )
 }
